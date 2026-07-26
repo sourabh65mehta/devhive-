@@ -9,7 +9,7 @@ const createQuestion = async({title,body,image_url,user_id}) =>{
     const result = await pool.query(`
        INSERT INTO questions (title,body,image_url,user_id)
        VALUES ($1,$2,$3 ,$4)
-       RETURNING title,body,created_at
+       RETURNING id,title,body,image_url,created_at
         
         `,[title,body,image_url,user_id])
 

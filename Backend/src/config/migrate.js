@@ -67,7 +67,25 @@ const migrate = async ()=>{
                 
                 `)
             
-            await pool.query()
+            await pool.query(`
+                CREATE TABLE IF NOT EXISTS answers(
+                id UUID DEFAULT gen_random_uuid() PRIMARY KEY,
+                question_id UUID NOT NULL REFERENCES questions(id) ON DELETE CASCADE ,
+                user_id UUID NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+                body TEXT NOT NULL ,
+                created_at TIMESTAMP DEFAULT NOW(),
+                updated_at TIMESTAMP DEFAULT NOW()
+                
+                
+                )
+                
+                
+                
+                `)
+
+            await pool.query(`ALTER TABLE answers ADD COLUMN IF NOT EXISTS image_url TEXT`);
+
+            
                 
                 
                 

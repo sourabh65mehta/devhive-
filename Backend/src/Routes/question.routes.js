@@ -1,16 +1,19 @@
-import { getAllQuestionsController, questionController } from "../controllers/questions.controller.js";
+import {
+  getAllQuestionsController,
+  questionController,
+} from "../controllers/questions.controller.js";
 import authMiddleware from "../middlewares/auth.middleware.js";
 import { getQuestion } from "../controllers/questions.controller.js";
 import Asynchandler from "../utils/Asynchandler.js";
 import { Router } from "express";
 import { updateQuestionController } from "../controllers/questions.controller.js";
 import { deleteQuestionController } from "../controllers/questions.controller.js";
-const router = Router()
+const router = Router();
 
-router.post("/questions",authMiddleware,Asynchandler(questionController));
-router.get("/",Asynchandler(getAllQuestionsController))
-router.get("/question/:id",Asynchandler(getQuestion))
-router.patch("/question/:id",authMiddleware,Asynchandler(updateQuestionController))
-router.delete("/question/:id",authMiddleware,Asynchandler(deleteQuestionController))
+router.post("/", authMiddleware, Asynchandler(questionController));
+router.get("/", Asynchandler(getAllQuestionsController));
+router.get("/:id", Asynchandler(getQuestion));
+router.patch("/:id", authMiddleware, Asynchandler(updateQuestionController));
+router.delete("/:id", authMiddleware, Asynchandler(deleteQuestionController));
 
-export {router as questionRoute}
+export { router as questionRoute };
