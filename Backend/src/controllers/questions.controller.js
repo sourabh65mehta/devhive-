@@ -15,7 +15,9 @@ const questionController = async(req,res) => {
         throw new ApiError(400,result.error.issues[0].message)
     }
     const {id} = req.user
-    const question = await createQuestion({...result.data,user_id:id});
+    const image_url = req.file ? req.file.path : null;
+    console.log(req.file)
+    const question = await createQuestion({...result.data,user_id:id,image_url});
     return res.status(201).json(new ApiResponse(201,"question posted successsfully",question))
 }
 
@@ -44,9 +46,14 @@ const updateQuestionController = async(req,res) =>{
     if(!result.success){
         throw new ApiError(400,result.error.issues[0].message);
     }
-    const {title,body,image_url} = result.data
+    const {title,body} = result.data
     const { id: question_id } = req.params
     const { id: user_id } = req.user
+    
+    const image_url = req.file ? req.file.path : null;
+    if(!result.data.body && !req.file){
+        throw new ApiError(400,"at least one field (body or image) must be provided to update")
+    }
     const putQuestion = await updateQuestion({title,body,image_url,question_id,user_id})
     return res.status(200).json(new ApiResponse(200,"question updated successfully",putQuestion))
 }

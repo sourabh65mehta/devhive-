@@ -20,7 +20,7 @@ const createAnswerController = async (req, res) => {
   }
   const { id } = req.user;
   const { questionId } = req.params;
-  const image_url = req.file ? req.file.secure_url : null;
+  const image_url = req.file ? req.file.path : null;
   const answer = await createAnswer({
     ...result.data,
     user_id: id,
@@ -55,7 +55,13 @@ const updateAnswerController = async (req, res) => {
   if (!result.success) {
     throw new ApiError(400, result.error.issues[0].message);
   }
-  const image_url = req.file ? req.file.secure_url : null;
+  if (!result.data.body && !req.file) {
+    throw new ApiError(
+      400,
+      "at least one field (body or image) must be provided to update",
+    );
+  }
+  const image_url = req.file ? req.file.path : null;
   const answer = await updateAnswer({
     id: answerId,
     body: result.data.body,

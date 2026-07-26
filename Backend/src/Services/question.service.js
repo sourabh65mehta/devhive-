@@ -6,6 +6,7 @@ const createQuestion = async({title,body,image_url,user_id}) =>{
     if(!title || !body || !user_id){
          throw new ApiError(400,"title,body and user are required");
     }
+
     const result = await pool.query(`
        INSERT INTO questions (title,body,image_url,user_id)
        VALUES ($1,$2,$3 ,$4)

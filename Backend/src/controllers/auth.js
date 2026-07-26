@@ -5,7 +5,6 @@ import { refreshAccessToken } from "../Services/token.service.js";
 import {
   loginSchema,
   createUserSchema,
-  logoutSchema,
 } from "../validators/user.validator.js";
 
 const registerUser = async (req, res, next) => {
@@ -20,12 +19,21 @@ const registerUser = async (req, res, next) => {
     password,
   });
 
+  res.cookie("accessToken", accessToken, {
+    httpOnly: true,
+    secure: true,
+    sameSite: "none",
+    maxAge: 15 * 60 * 1000,
+  });
+  res.cookie("refreshToken", refreshToken, {
+    httpOnly: true,
+    secure: true,
+    sameSite: "none",
+    maxAge: 7 * 24 * 60 * 60 * 1000,
+  });
+
   return res.status(201).json(
-    new ApiResponse(201, "User registered successfully", {
-      user,
-      accessToken,
-      refreshToken,
-    }),
+    new ApiResponse(201, "User registered successfully", { user })
   );
 };
 
@@ -39,32 +47,49 @@ const loginnUser = async (req, res, next) => {
     email,
     password,
   });
-
+  res.cookie("accessToken", accessToken, {
+    httpOnly: true,
+    secure: true,
+    sameSite: "none",
+    maxAge: 15 * 60 * 1000,
+  });
+  res.cookie("refreshToken", refreshToken, {
+    httpOnly: true,
+    secure: true,
+    sameSite: "none",
+    maxAge: 7 * 24 * 60 * 60 * 1000,
+  });
   return res.status(200).json(
-    new ApiResponse(200, "User logged in successfully", {
-      user,
-      accessToken,
-      refreshToken,
-    }),
+    new ApiResponse(200, "User logged in successfully", { user }),
   );
 };
 
 const logoutUserSession = async (req, res, next) => {
-  const { id: userId } = req.user;
-  const { refresh_token } = req.body;
-  const validate = logoutSchema.safeParse({ refresh_token });
-  if (!validate.success) {
-    throw new ApiError(400, validate.error.issues[0].message);
+  const userId = req.user?.id;
+  const refresh_token = req.cookies?.refreshToken || req.body?.refresh_token;
+  if (userId && refresh_token) {
+    try {
+      await LogoutUser({ userId, refresh_token });
+    } catch (e) {
+      console.warn("Logout db cleanup warning:", e.message);
+    }
   }
-  const result = await LogoutUser({ userId, refresh_token });
+  res.clearCookie("accessToken");
+  res.clearCookie("refreshToken");
   return res
     .status(200)
-    .json(new ApiResponse(200, "User logged out successfully", result));
+    .json(new ApiResponse(200, "User logged out successfully", { message: "Logged out" }));
 };
 
 const newAccessToken = async (req, res, next) => {
-  const { refresh_token } = req.body;
+  const refresh_token = req.cookies?.refreshToken || req.body?.refresh_token;
   const { accessToken } = await refreshAccessToken(refresh_token);
+  res.cookie("accessToken", accessToken, {
+    httpOnly: true,
+    secure: true,
+    sameSite: "none",
+    maxAge: 15 * 60 * 1000,
+  });
   return res.status(200).json(
     new ApiResponse(200, "New access token generated successfully", {
       accessToken,
