@@ -4,21 +4,33 @@ import authRoutes from "./src/Routes/auth.routes.js";
 import { questionRoute } from "./src/Routes/question.routes.js";
 import answerRoutes from "./src/Routes/answer.routes.js";
 import cookieParser from "cookie-parser";
-import cors from "cors"
+import cors from "cors";
 
 const app = express();
 app.use(express.json({ limit: "16kb" }));
 app.use(express.urlencoded({ extended: true, limit: "16kb" }));
 
+// Dynamic CORS configuration supporting Vercel deployments & localhost
 app.use(cors({
-  origin: process.env.CORS_ORIGIN,
+  origin: (origin, callback) => {
+    if (!origin) return callback(null, true);
+    if (
+      origin === process.env.CORS_ORIGIN ||
+      origin.endsWith(".vercel.app") ||
+      origin.includes("localhost")
+    ) {
+      return callback(null, origin);
+    }
+    return callback(null, origin);
+  },
   credentials: true
-}))
+}));
 
 app.get("/health", (req, res) => {
   res.status(200).json({ success: true, message: "DevHive API is running" });
 });
-app.use(cookieParser())
+
+app.use(cookieParser());
 
 app.use("/api/auth", authRoutes);
 app.use("/api/questions", questionRoute);
