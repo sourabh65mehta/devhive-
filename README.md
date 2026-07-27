@@ -181,3 +181,4 @@ npm run dev
 ## 👨‍💻 Author
 
 Engineered by **Sourabh Mehta**. Designed with modern backend engineering practices, PostgreSQL data modeling, and clean security principles.
+next goals are to include votes and migrate to prisma from raw sql as it was used to learn the underhood concepts prisma  will do
